@@ -17,8 +17,10 @@ K = keras_import('backend')
 Input, Conv2D, MaxPooling2D = keras_import('layers', 'Input', 'Conv2D', 'MaxPooling2D')
 Model = keras_import('models', 'Model')
 
-from .base import SplineDistBase, SplineDistDataBase
-from ..sample_patches import sample_patches
+
+from .base import SplineDistBase
+from .base import SplineDistDataBase
+from .. import sample_patches # import sample_patches
 from ..utils import edt_prob, _normalize_grid
 from ..geometry import spline_dist, dist_to_coord, polygons_to_label
 from ..nms import non_maximum_suppression
