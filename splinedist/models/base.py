@@ -22,10 +22,10 @@ from csbdeep.internals.predict import tile_iterator
 from csbdeep.internals.train import RollingSequence
 from csbdeep.data import Resizer
 
-from ..sample_patches import get_valid_inds
-from ..utils import _is_power_of_2, optimize_threshold
+from .. import sample_patches #import get_valid_inds
+from .. import utils #utils import _is_power_of_2, optimize_threshold
 
-import splinegenerator as sg
+from .. import splinegenerator as sg
 
 def generic_masked_loss(mask, n_params, loss, weights=1, norm_by_mask=True, reg_weight=0, reg_penalty=K.abs):
     def _loss(y_true, y_pred):  
