@@ -9,7 +9,7 @@ from csbdeep.utils import _raise
 from ..utils import path_absolute, _is_power_of_2, _normalize_grid
 from ..matching import _check_label_array
 
-import splinegenerator as sg
+from .. import splinegenerator as sg
 from scipy.special import expit
 import math
 from skimage import measure
