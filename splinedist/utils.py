@@ -301,18 +301,18 @@ def wrapIndex(t, k, M, half_support):
     return wrappedT
 
 
-def phi_generator(M, contoursize_max):
+def phi_generator(M, contoursize_max, output_directory):
     ts = np.linspace(0, float(M), num=contoursize_max, endpoint=False)
     wrapped_indices = np.array([[wrapIndex(t, k, M, 2)
                                  for k in range(M)] for t in ts])
     vfunc = np.vectorize(sg.B3().value)
     phi = vfunc(wrapped_indices)     
     phi = phi.astype(np.float32)
-    np.save('phi_' + str(M) + '.npy',phi)
+    np.save(os.path.join(output_directory,'phi_' + str(M) + '.npy'),phi)
     return
     
     
-def grid_generator(M, patch_size, grid_subsampled):
+def grid_generator(M, patch_size, grid_subsampled, output_directory):
     coord = np.ones((patch_size[0],patch_size[1],M,2))
 
     xgrid_points = np.linspace(0,coord.shape[0]-1,coord.shape[0])
@@ -326,7 +326,7 @@ def grid_generator(M, patch_size, grid_subsampled):
 
     grid = grid[:,0::grid_subsampled[0],0::grid_subsampled[1]]
     grid = grid.astype(np.float32)
-    np.save('grid_' + str(M) + '.npy', grid)
+    np.save(os.path.join(output_directory,'grid_' + str(M) + '.npy'), grid)
     return
 
 
