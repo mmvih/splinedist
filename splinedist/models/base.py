@@ -22,9 +22,8 @@ from csbdeep.internals.predict import tile_iterator
 from csbdeep.internals.train import RollingSequence
 from csbdeep.data import Resizer
 
-from .. import sample_patches #import get_valid_inds
-from .. import utils #utils import _is_power_of_2, optimize_threshold
-
+from ..sample_patches import get_valid_inds
+from ..utils import _is_power_of_2, optimize_threshold
 from .. import splinegenerator as sg
 
 def generic_masked_loss(mask, n_params, loss, weights=1, norm_by_mask=True, reg_weight=0, reg_penalty=K.abs):
@@ -567,11 +566,7 @@ class SplineDistBase(BaseModel):
             labels, polys = block.filter_objects(labels, polys, axes=axes_out)
             # TODO: relabel_sequential is not very memory-efficient (will allocate memory proportional to label_offset)
             labels = relabel_sequential(labels, label_offset)[0]
-            # labels, fwd_map, _ = relabel_sequential(labels, label_offset)
-            # if len(incomplete) > 0:
-            #     problem_ids.extend([fwd_map[i] for i in incomplete])
-            #     if show_progress:
-            #         blocks.set_postfix_str(f"found {len(problem_ids)} problematic {'object' if len(problem_ids)==1 else 'objects'}")
+            
             if labels_out is not None:
                 block.write(labels_out, labels, axes=axes_out)
             for k,v in polys.items():
@@ -579,12 +574,6 @@ class SplineDistBase(BaseModel):
             label_offset += len(polys['prob'])
 
         polys_all = {k: (np.concatenate(v) if k in OBJECT_KEYS else v[0]) for k,v in polys_all.items()}
-
-        # if labels_out is not None and len(problem_ids) > 0:
-        #     # if show_progress:
-        #     #     blocks.write('')
-        #     # print(f"Found {len(problem_ids)} objects that violate the 'min_overlap' assumption.", file=sys.stderr, flush=True)
-        #     repaint_labels(labels_out, problem_ids, polys_all, show_progress=False)
 
         return labels_out, polys_all#, tuple(problem_ids)
 
@@ -784,12 +773,9 @@ class SplineDistPadAndCropResizer(Resizer):
         assert all(s_pad == s * g for s,s_pad,g in zip(x.shape,
                                                        (self.padded_shape.get(a,_s) for a,_s in zip(axes,x.shape)),
                                                        (self.grid.get(a,1) for a in axes)))
-        # print(self.padded_shape)
-        # print(self.pad)
-        # print(self.grid)
+
         crop = tuple (
             slice(0, -(math.floor(p[1]/g)) if p[1]>=g else None)
             for p,g in zip((self.pad.get(a,(0,0)) for a in axes),(self.grid.get(a,1) for a in axes))
         )
-        # print(crop)
         return x[crop]
