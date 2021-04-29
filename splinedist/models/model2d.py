@@ -41,7 +41,7 @@ class SplineDistData2D(SplineDistDataBase):
         else:
             self.b = slice(None),slice(None)
 
-        self.sd_mode = 'opencl' if self.use_gpu else 'cpp'
+        self.sd_mode = 'cuda' if self.use_gpu else 'cpp'
         
         self.contoursize_max = contoursize_max
 
