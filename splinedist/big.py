@@ -7,7 +7,7 @@ from skimage.draw import polygon
 from csbdeep.utils import _raise, axes_check_and_normalize, axes_dict
 from itertools import product
 
-from .geometry import polygons_to_label, polyhedron_to_label
+from .geometry import polygons_to_label #, polyhedron_to_label
 
 
 
