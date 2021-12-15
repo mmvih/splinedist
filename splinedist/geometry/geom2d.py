@@ -125,14 +125,8 @@ def relabel_image_splinedist(lbl, n_params, **kwargs):
     return polygons_to_label(coord, np.ones_like(lbl), points, shape=lbl.shape)
  
 def contour_cv2_mask_uniform(mask, contoursize_max):
-    mask = mask.astype(np.uint8)    
-    try:
-        contours,_ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
-    except:
-        print(mask.shape)
-        print(np.any(mask))
-        print(mask)
-        raise
+    mask = mask.astype(np.uint8)
+    contours,_ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
     areas = [cv2.contourArea(cnt) for cnt in contours]    
     max_ind = np.argmax(areas)
     contour = np.squeeze(contours[max_ind])
