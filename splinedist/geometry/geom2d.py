@@ -14,27 +14,42 @@ from scipy.special import expit
 import math
 from skimage import measure
 from scipy.interpolate import interp1d
+from scipy.ndimage import find_objects
 import cv2
 import tensorflow as tf
 
-def spline_dist(a, n_params=32, contoursize_max=400):
+def spline_dist(a, n_params=32, contoursize_max=400, slices=False):
     """'a' assumbed to be a label image with integer values that encode object ids. id 0 denotes background."""
 
-    n_params >= 3 or _raise(ValueError("need 'n_params' >= 3"))
+    # n_params >= 3 or _raise(ValueError("need 'n_params' >= 3"))
     
     dist = np.zeros((a.shape[0],a.shape[1],contoursize_max,2))
+
+    if not slices:        
     
-    obj_list = np.unique(a)
-    obj_list = obj_list[1:]  
-        
-    for i in range(len(obj_list)):  
-        mask_temp = a.copy()     
-        mask_temp[mask_temp != obj_list[i]] = 0
-        mask_temp[mask_temp > 0] = 1
-        
-        contour = contour_cv2_mask_uniform(mask_temp, contoursize_max)
-        idx_nonzero = np.argwhere(mask_temp)
-        dist[idx_nonzero[:,0],idx_nonzero[:,1]] = contour
+        obj_list = np.unique(a)
+        obj_list = obj_list[1:]  
+        for i in range(len(obj_list)):  
+            mask_temp = a.copy()     
+            mask_temp[mask_temp != obj_list[i]] = 0
+            mask_temp[mask_temp > 0] = 1
+            
+            contour = contour_cv2_mask_uniform(mask_temp, contoursize_max)
+            idx_nonzero = np.argwhere(mask_temp)
+            dist[idx_nonzero[:,0],idx_nonzero[:,1]] = contour
+
+    else:
+    
+        _, contiguous = np.unique(a,return_inverse=True)
+        labels = contiguous.reshape(a.shape)
+        for i,sl in enumerate(find_objects(labels)):
+            offsets = np.asarray([[s.start for s in sl]])
+            mask_temp = (labels[sl] == i+1).astype(a.dtype)
+
+            idx_nonzero = np.argwhere(mask_temp) + offsets
+            
+            contour = contour_cv2_mask_uniform(mask_temp, contoursize_max) + offsets
+            dist[idx_nonzero[:,0],idx_nonzero[:,1]] = contour
             
     dist = np.reshape(dist,(dist.shape[0],dist.shape[1],-1))    
     return dist
@@ -110,7 +125,7 @@ def relabel_image_splinedist(lbl, n_params, **kwargs):
     return polygons_to_label(coord, np.ones_like(lbl), points, shape=lbl.shape)
  
 def contour_cv2_mask_uniform(mask, contoursize_max):
-    mask = mask.astype(np.uint8)    
+    mask = mask.astype(np.uint8)
     contours,_ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
     areas = [cv2.contourArea(cnt) for cnt in contours]    
     max_ind = np.argmax(areas)
